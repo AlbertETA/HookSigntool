@@ -14,6 +14,7 @@ BOOL WINAPI DllMain(
 	{
 		MessageBoxA(NULL, "Detaching", "Hook", NULL);
 	}
+	return 1;
 }
 
 extern "C" __declspec(dllexport) int attach()
