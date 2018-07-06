@@ -6,4 +6,17 @@ BOOL WINAPI DllMain(
 	_In_ LPVOID lpvReserved
 )
 {
+	if (fdwReason == DLL_PROCESS_ATTACH)
+	{
+		MessageBoxA(NULL, "Attaching", "Hook", NULL);
+	}
+	if (fdwReason == DLL_PROCESS_DETACH)
+	{
+		MessageBoxA(NULL, "Detaching", "Hook", NULL);
+	}
+}
+
+extern "C" __declspec(dllexport) int attach()
+{
+	return 0;
 }
