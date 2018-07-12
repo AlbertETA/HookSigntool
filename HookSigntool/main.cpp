@@ -15,6 +15,7 @@ void WINAPI NewGetLocalTime(
 	pOldGetLocalTime(lpSystemTime);
 	lpSystemTime->wYear = 2011;
 	lpSystemTime->wMonth = 4;
+	lpSystemTime->wDay = 1;
 }
 
 BOOL WINAPI DllMain(
