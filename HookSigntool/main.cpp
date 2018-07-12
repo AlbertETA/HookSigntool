@@ -4,22 +4,16 @@
 #include <stdlib.h>
 #include <detours.h>
 
-//保存函数原型
-static int (WINAPI *OldMesssageBoxW)(
-	_In_opt_ HWND hWnd,
-	_In_opt_ LPCWSTR lpText,
-	_In_opt_ LPCWSTR lpCaption,
-	_In_ UINT uType) = MessageBoxW;
+void (WINAPI *pOldGetLocalTime)(
+	LPSYSTEMTIME lpSystemTime
+	) = GetLocalTime;
 
-//改写函数
-static int WINAPI NewMessageBoxW(
-	_In_opt_ HWND hWnd,
-	_In_opt_ LPCWSTR lpText,
-	_In_opt_ LPCWSTR lpCaption,
-	_In_ UINT uType)
+void WINAPI NewGetLocalTime(
+	LPSYSTEMTIME lpSystemTime
+)
 {
-	return OldMesssageBoxW(NULL, L"new MessageBox", L"Please", MB_OK);
-
+	pOldGetLocalTime(lpSystemTime);
+	lpSystemTime->wYear = 2011;
 }
 
 BOOL WINAPI DllMain(
@@ -33,7 +27,7 @@ BOOL WINAPI DllMain(
 		MessageBoxA(NULL, "Attaching", "Hook", NULL);
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
-		DetourAttach(&(PVOID&)OldMesssageBoxW, NewMessageBoxW);
+		DetourAttach(&(PVOID&)pOldGetLocalTime, NewGetLocalTime);
 		DetourTransactionCommit();
 		MessageBoxA(NULL, "Attached", "Hook", NULL);
 	}
