@@ -1,15 +1,12 @@
 #pragma comment(lib, "detours.lib")
 #include <Windows.h>
-#include <time.h>
+
 #include <stdlib.h>
 #include <detours.h>
 
-void (WINAPI *pOldGetLocalTime)(
-	LPSYSTEMTIME lpSystemTime
-) = GetLocalTime;
-time_t(WINAPIV *pOldtime)(
-	time_t *_Time
-) = time;
+using fntGetLocalTime = decltype(GetLocalTime);
+
+fntGetLocalTime *pOldGetLocalTime = NULL;
 
 void WINAPI NewGetLocalTime(
 	LPSYSTEMTIME lpSystemTime
@@ -20,13 +17,7 @@ void WINAPI NewGetLocalTime(
 	lpSystemTime->wMonth = 4;
 	lpSystemTime->wDay = 1;
 }
-time_t WINAPIV Newtime(
-	time_t *_Time
-)
-{
-	*((__int64 *)_Time) = 1301587200L;
-	return *_Time;
-}
+
 
 BOOL WINAPI DllMain(
 	_In_ HINSTANCE hinstDLL,
@@ -40,7 +31,6 @@ BOOL WINAPI DllMain(
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
 		DetourAttach(&(PVOID&)pOldGetLocalTime, NewGetLocalTime);
-		DetourAttach(&(PVOID&)pOldtime, Newtime);
 		DetourTransactionCommit();
 		MessageBoxA(NULL, "Attached", "Hook", NULL);
 	}
