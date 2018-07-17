@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <detours.h>
 
-using fntGetLocalTime = decltype(GetLocalTime);
-
-fntGetLocalTime *pOldGetLocalTime = NULL;
+void (WINAPI *pOldGetLocalTime)(
+	LPSYSTEMTIME lpSystemTime
+) = GetLocalTime;
 
 void WINAPI NewGetLocalTime(
 	LPSYSTEMTIME lpSystemTime
