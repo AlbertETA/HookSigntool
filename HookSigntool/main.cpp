@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <detours.h>
 
-void (WINAPI *pOldGetLocalTime)(
-	LPSYSTEMTIME lpSystemTime
-) = GetLocalTime;
+using fntGetLocalTime = decltype(GetLocalTime);
+
+fntGetLocalTime *pOldGetLocalTime = NULL;
 
 void WINAPI NewGetLocalTime(
 	LPSYSTEMTIME lpSystemTime
@@ -27,6 +27,8 @@ BOOL WINAPI DllMain(
 {
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
+		pOldGetLocalTime = (fntGetLocalTime *)GetProcAddress(LoadLibraryW(L"kernel32.dll"), "GetLocalTime");
+
 		MessageBoxA(NULL, "Attaching", "Hook", NULL);
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
