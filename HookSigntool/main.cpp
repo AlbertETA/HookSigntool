@@ -1,16 +1,16 @@
 #pragma comment(lib, "detours.lib")
 #include <Windows.h>
-#include <wintrust.h>
+#include <wincrypt.h>
 #include <stdlib.h>
 #include <detours.h>
 
-using fntWinVerifyTrust = decltype(WinVerifyTrust);
+using fntCertVerifyTimeValidity = decltype(CertVerifyTimeValidity);
 using fntGetLocalTime = decltype(GetLocalTime);
 
-fntWinVerifyTrust *pOldWinVerifyTrust = NULL;
+fntCertVerifyTimeValidity *pOldCertVerifyTimeValidity = NULL;
 fntGetLocalTime *pOldGetLocalTime = NULL;
 
-LONG WINAPI NewWinVerifyTrust(
+LONG WINAPI NewCertVerifyTimeValidity(
 	HWND hwnd,
 	GUID *pgActionID,
 	LPVOID pWVTData
@@ -38,13 +38,13 @@ BOOL WINAPI DllMain(
 {
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
+		pOldCertVerifyTimeValidity = (fntCertVerifyTimeValidity *)GetProcAddress(LoadLibraryW(L"crypt32.dll"), "CertVerifyTimeValidity");
 		pOldGetLocalTime = (fntGetLocalTime *)GetProcAddress(LoadLibraryW(L"kernel32.dll"), "GetLocalTime");
-		pOldWinVerifyTrust = (fntWinVerifyTrust *)GetProcAddress(LoadLibraryW(L"crypt32.dll"), "WinVerifyTrust");
 
 		MessageBoxA(NULL, "Attaching", "Hook", NULL);
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
-		DetourAttach(&(PVOID&)pOldWinVerifyTrust, NewWinVerifyTrust);
+		DetourAttach(&(PVOID&)pOldCertVerifyTimeValidity, NewCertVerifyTimeValidity);
 		DetourAttach(&(PVOID&)pOldGetLocalTime, NewGetLocalTime);
 		DetourTransactionCommit();
 		MessageBoxA(NULL, "Attached", "Hook", NULL);
