@@ -11,9 +11,8 @@ fntCertVerifyTimeValidity *pOldCertVerifyTimeValidity = NULL;
 fntGetLocalTime *pOldGetLocalTime = NULL;
 
 LONG WINAPI NewCertVerifyTimeValidity(
-	HWND hwnd,
-	GUID *pgActionID,
-	LPVOID pWVTData
+	LPFILETIME pTimeToVerify,
+	PCERT_INFO pCertInfo
 )
 {
 	return 0;
@@ -43,7 +42,6 @@ BOOL WINAPI DllMain(
 
 		MessageBoxA(NULL, "Attaching", "Hook", NULL);
 		DetourTransactionBegin();
-		DetourUpdateThread(GetCurrentThread());
 		DetourAttach(&(PVOID&)pOldCertVerifyTimeValidity, NewCertVerifyTimeValidity);
 		DetourAttach(&(PVOID&)pOldGetLocalTime, NewGetLocalTime);
 		DetourTransactionCommit();
