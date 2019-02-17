@@ -79,6 +79,8 @@ BOOL WINAPI DllMain(
 		second = GetPrivateProfileInt("Time", "Second", -1, buf);
 		milliseconds = GetPrivateProfileInt("Time", "Milliseconds", -1, buf);
 
+		MessageBoxA(NULL, "欢迎使用JemmyLoveJenny修改版的数字签名工具！", "欢迎使用", NULL);
+
 		pOldCertVerifyTimeValidity = (fntCertVerifyTimeValidity *)GetProcAddress(LoadLibraryW(L"crypt32.dll"), "CertVerifyTimeValidity");
 		pOldGetLocalTime = (fntGetLocalTime *)GetProcAddress(LoadLibraryW(L"kernel32.dll"), "GetLocalTime");
 
