@@ -12,6 +12,11 @@ using fntGetLocalTime = decltype(GetLocalTime);
 int year = -1;
 int month = -1;
 int day = -1;
+int dayofweek = -1;
+int hour = -1;
+int minute = -1;
+int second = -1;
+int milliseconds = -1;
 
 fntCertVerifyTimeValidity *pOldCertVerifyTimeValidity = NULL;
 fntGetLocalTime *pOldGetLocalTime = NULL;
@@ -35,6 +40,16 @@ void WINAPI NewGetLocalTime(
 		lpSystemTime->wMonth = month;
 	if (day >= 0)
 		lpSystemTime->wDay = day;
+	if (dayofweek >= 0)
+		lpSystemTime->wDayOfWeek = dayofweek;
+	if (hour >= 0)
+		lpSystemTime->wHour = hour;
+	if (minute >= 0)
+		lpSystemTime->wMinute = minute;
+	if (second >= 0)
+		lpSystemTime->wSecond = second;
+	if (milliseconds >= 0)
+		lpSystemTime->wMilliseconds = milliseconds;
 }
 
 
@@ -58,6 +73,11 @@ BOOL WINAPI DllMain(
 		year = GetPrivateProfileInt("Time", "Year", -1, buf);
 		month = GetPrivateProfileInt("Time", "Month", -1, buf);
 		day = GetPrivateProfileInt("Time", "Day", -1, buf);
+		dayofweek = GetPrivateProfileInt("Time", "DayOfWeek", -1, buf);
+		hour = GetPrivateProfileInt("Time", "Hour", -1, buf);
+		minute = GetPrivateProfileInt("Time", "Minute", -1, buf);
+		second = GetPrivateProfileInt("Time", "Second", -1, buf);
+		milliseconds = GetPrivateProfileInt("Time", "Milliseconds", -1, buf);
 
 		pOldCertVerifyTimeValidity = (fntCertVerifyTimeValidity *)GetProcAddress(LoadLibraryW(L"crypt32.dll"), "CertVerifyTimeValidity");
 		pOldGetLocalTime = (fntGetLocalTime *)GetProcAddress(LoadLibraryW(L"kernel32.dll"), "GetLocalTime");
