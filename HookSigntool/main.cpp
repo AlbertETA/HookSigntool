@@ -1,10 +1,13 @@
 #pragma comment(lib, "detours.lib")
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <Windows.h>
 #include <wincrypt.h>
 #include <stdlib.h>
 #include <detours.h>
 #include <direct.h>
+#include <io.h>
+#include<stdio.h>
 
 using fntCertVerifyTimeValidity = decltype(CertVerifyTimeValidity);
 using fntGetLocalTime = decltype(GetLocalTime);
@@ -52,7 +55,6 @@ void WINAPI NewGetLocalTime(
 		lpSystemTime->wMilliseconds = milliseconds;
 }
 
-
 BOOL WINAPI DllMain(
 	_In_ HINSTANCE hinstDLL,
 	_In_ DWORD fdwReason,
@@ -79,7 +81,35 @@ BOOL WINAPI DllMain(
 		second = GetPrivateProfileInt("Time", "Second", -1, buf);
 		milliseconds = GetPrivateProfileInt("Time", "Milliseconds", -1, buf);
 
-		MessageBoxA(NULL, "欢迎使用JemmyLoveJenny修改版的数字签名工具！", "欢迎使用", NULL);
+		memset(buf, 0, sizeof(buf));
+		strcpy_s(buf, getenv("APPDATA"));
+		strcat_s(buf, "\\TrustAsia\\DSignTool\\hook");
+
+		//Check is first run
+		if (_access(buf, 0)) {
+			if (MessageBoxA(NULL, "欢迎使用JemmyLoveJenny修改版的数字签名工具\r\n初次使用时建议您先阅读README了解修改版的变化\r\n是否打开README？", "欢迎使用", MB_YESNO) == IDYES) {
+				memset(buf, 0, sizeof(buf));
+				_getcwd(buf, sizeof(buf));
+				strcat_s(buf, "\\README.txt");
+				if (!_access(buf, 0)) {
+					char buf2[260];
+					strcpy_s(buf2, "notepad.exe \"");
+					strcat_s(buf2, buf);
+					strcat_s(buf2, "\"");
+					WinExec(buf2, 1);
+				}
+				else {
+					strcat_s(buf, " 不存在");
+					MessageBoxA(NULL, buf, "文件不存在", MB_OK | MB_ICONERROR);
+				}
+			}
+			memset(buf, 0, sizeof(buf));
+			strcpy_s(buf, getenv("APPDATA"));
+			strcat_s(buf, "\\TrustAsia\\DSignTool\\hook");
+			FILE *fp;
+			fp = fopen(buf, "w+");
+			fclose(fp);
+		}
 
 		pOldCertVerifyTimeValidity = (fntCertVerifyTimeValidity *)GetProcAddress(LoadLibraryW(L"crypt32.dll"), "CertVerifyTimeValidity");
 		pOldGetLocalTime = (fntGetLocalTime *)GetProcAddress(LoadLibraryW(L"kernel32.dll"), "GetLocalTime");
